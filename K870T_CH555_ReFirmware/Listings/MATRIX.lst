@@ -1,0 +1,182 @@
+C51 COMPILER V9.60.7.0   MATRIX                                                            07/30/2026 15:48:51 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MATRIX
+OBJECT MODULE PLACED IN .\Objects\MATRIX.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE MATRIX.c LARGE OPTIMIZE(9,SIZE) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listin
+                    -gs\MATRIX.lst) TABS(2) OBJECT(.\Objects\MATRIX.obj)
+
+line level    source
+
+   1          #include "MATRIX.h"
+   2          
+   3          UINT8C BitMask[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
+   4          
+   5          UINT8C KeyMap[MATRIX_ROWS][MATRIX_COLS] = {
+   6              { KC_ESC,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  K
+             -C_F11,  KC_F12,  KC_PSCR, KC_SLCK, KC_PAUS, KC_NO   },
+   7              { KC_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    K
+             -C_MINS, KC_EQL,  KC_BSPC, KC_INS,  KC_HOME, KC_PGUP },
+   8              { KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    K
+             -C_LBRC, KC_RBRC, KC_BSLS, KC_DEL,  KC_END,  KC_PGDN },
+   9              { KC_CAPS, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, K
+             -C_QUOT, KC_NO,   KC_ENT,  KC_NO,   KC_NO,   KC_NO   },
+  10              { MOD_LSFT,KC_NO,   KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  K
+             -C_SLSH, MOD_RSFT,KC_NO,   KC_UP,   KC_NO,   KC_NO   },
+  11              { MOD_LCTL,MOD_LGUI,MOD_LALT,KC_NO,   KC_SPC,  KC_NO,   KC_NO,   MOD_RALT,KC_LED_TOG, KC_APP, MOD_RCTL
+             -,KC_LEFT, KC_DOWN, KC_RGHT, KC_NO,   KC_NO,   KC_NO   }
+  12          };
+  13          
+  14          /* B?ng 32 vi bu?c chuy?n màu liên t?c siêu m?n */
+  15          UINT8C Palette_R[32] = {2,2,2,2,2,2,1,1,0,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2};
+  16          UINT8C Palette_G[32] = {0,0,1,1,2,2,2,2,2,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,1,1};
+  17          UINT8C Palette_B[32] = {0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,0,0,0,0};
+  18          
+  19          UINT8X KeyboardReport[ENDP1_IN_SIZE];
+  20          UINT8 ReportChanged = 0;
+  21          static UINT8X PrevReport[ENDP1_IN_SIZE];
+  22          
+  23          UINT8 LedOn = 1;
+  24          static UINT8 LedKeyDebounce = 0;
+  25          static UINT8 HueShift = 0;
+  26          static UINT8 HueTick = 0;
+  27          static UINT8 FrameCnt = 0;
+  28          
+  29          void Matrix_Init(void)
+  30          {
+  31   1          UINT8 i;
+  32   1      
+  33   1          P0_MOD_OC &= ~0xFF; P0_DIR_PU |= 0xFF; P0 = 0xFF;
+  34   1          P7 |= (bP7_0_DIR | bP7_1_DIR | bP7_0_OUT_PU | bP7_1_OUT_PU);
+  35   1          P3_MOD_OC &= ~0xFE; P3_DIR_PU |= 0xFE; P3 = 0xFF;
+  36   1      
+  37   1          P2_MOD_OC &= ~0xFF; P2_DIR_PU |= 0xFF; P2 = 0xFF;
+  38   1          P1_MOD_OC &= ~0xFF; P1_DIR_PU |= 0xFF; P1 = 0xFF;
+  39   1          P4_MOD_OC |= 0xFF; P4_DIR_PU |= 0xFF; P4 = 0xFF;
+  40   1      
+  41   1          for (i = 0; i < ENDP1_IN_SIZE; i++) {
+  42   2              KeyboardReport[i] = 0;
+  43   2              PrevReport[i] = 0;
+  44   2          }
+  45   1      }
+  46          
+  47          void Matrix_Scan(void)
+  48          {
+C51 COMPILER V9.60.7.0   MATRIX                                                            07/30/2026 15:48:51 PAGE 2   
+
+  49   1          UINT8 r, c, keycode, key_count = 0, i;
+  50   1          UINT8 led_key_pressed = 0;
+  51   1          UINT8 col_r, col_g, col_b, idx, toggle;
+  52   1          static UINT8 last_a = 1;
+  53   1          UINT8 curr_a;
+  54   1      
+  55   1          for (i = 0; i < ENDP1_IN_SIZE; i++) KeyboardReport[i] = 0;
+  56   1      
+  57   1          FrameCnt++;
+  58   1          toggle = FrameCnt & 0x01; // C? pha màu 50%
+  59   1      
+  60   1          /* Nhích vi bu?c liên t?c sau m?i 22 lu?t quét */
+  61   1          if (++HueTick >= 22) {
+  62   2              HueTick = 0;
+  63   2              HueShift = (HueShift + 1) & 0x1F;
+  64   2          }
+  65   1      
+  66   1          for (c = 0; c < MATRIX_COLS; c++) {
+  67   2              /* ---- Pha 1: Quét màu LED t?ng vi bu?c ---- */
+  68   2              if (LedOn) {
+  69   3      #if RAINBOW_REVERSE
+  70   3                  idx = (HueShift - c) & 0x1F;
+  71   3      #else
+                          idx = (HueShift + c) & 0x1F;
+              #endif
+  74   3                  col_r = Palette_R[idx];
+  75   3                  col_g = Palette_G[idx];
+  76   3                  col_b = Palette_B[idx];
+  77   3              } else {
+  78   3                  col_r = col_g = col_b = 0;
+  79   3              }
+  80   2      
+  81   2              P2 = (col_g > toggle) ? 0x00 : 0xFF;
+  82   2              P1 = (col_b > toggle) ? 0x00 : 0xFF;
+  83   2      
+  84   2              P4_MOD_OC &= ~0xFF;          /* P4 Output Push-pull (Kênh Ð?) */
+  85   2              P4 = (col_r > toggle) ? 0x00 : 0xFF;
+  86   2      
+  87   2              /* Inline kéo C?t xu?ng LOW */
+  88   2              P0 = 0xFF; P7 |= (bP7_0_OUT_PU | bP7_1_OUT_PU); P3 = 0xFF;
+  89   2              if (c < 8) P0 = ~BitMask[c];
+  90   2              else if (c == 8) P7 &= ~bP7_1_OUT_PU;
+  91   2              else if (c == 9) P7 &= ~bP7_0_OUT_PU;
+  92   2              else if (c == 16) P3 &= ~0x02;
+  93   2              else P3 &= ~BitMask[c - 8];
+  94   2      
+  95   2              mDelayuS(5);
+  96   2      
+  97   2              /* ---- Pha 2: Chuy?n P4 d?c Ma tr?n phím ---- */
+  98   2              P4_MOD_OC |= 0xFF;           /* P4 Quasi-bidirectional */
+  99   2              P4 = 0xFF;
+ 100   2              mDelayuS(5);
+ 101   2      
+ 102   2              for (r = 0; r < MATRIX_ROWS; r++) {
+ 103   3                  if ((P4 & BitMask[r]) == 0) {
+ 104   4                      keycode = KeyMap[r][c];
+ 105   4      
+ 106   4                      if (keycode == KC_LED_TOG) {
+ 107   5                          led_key_pressed = 1;
+ 108   5                      }
+ 109   4                      else if (keycode != KC_NO) {
+ 110   5                          if (keycode >= 0xE0 && keycode <= 0xE7) {
+C51 COMPILER V9.60.7.0   MATRIX                                                            07/30/2026 15:48:51 PAGE 3   
+
+ 111   6                              KeyboardReport[0] |= BitMask[keycode - 0xE0];
+ 112   6                          }
+ 113   5                          else if (key_count < 6) {
+ 114   6                              KeyboardReport[2 + key_count] = keycode;
+ 115   6                              key_count++;
+ 116   6                          }
+ 117   5                      }
+ 118   4                  }
+ 119   3              }
+ 120   2          }
+ 121   1      
+ 122   1          if (led_key_pressed) {
+ 123   2              if (!LedKeyDebounce) {
+ 124   3                  LedOn = !LedOn;
+ 125   3                  LedKeyDebounce = 1;
+ 126   3              }
+ 127   2          } else {
+ 128   2              LedKeyDebounce = 0;
+ 129   2          }
+ 130   1      
+ 131   1          P0 = 0xFF; P7 |= (bP7_0_OUT_PU | bP7_1_OUT_PU); P3 = 0xFF;
+ 132   1          P2 = 0xFF; P1 = 0xFF; P4 = 0xFF;
+ 133   1      
+ 134   1          /* Inline d?c Encoder */
+ 135   1          curr_a = ENCODER_PAD_A;
+ 136   1          if (last_a == 1 && curr_a == 0) {
+ 137   2              KeyboardReport[2] = (ENCODER_PAD_B == 1) ? KC_VOLU : KC_VOLD;
+ 138   2          }
+ 139   1          last_a = curr_a;
+ 140   1      
+ 141   1          ReportChanged = 0;
+ 142   1          for (i = 0; i < ENDP1_IN_SIZE; i++) {
+ 143   2              if (KeyboardReport[i] != PrevReport[i]) {
+ 144   3                  ReportChanged = 1;
+ 145   3                  PrevReport[i] = KeyboardReport[i];
+ 146   3              }
+ 147   2          }
+ 148   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    656    ----
+   CONSTANT SIZE    =    206    ----
+   XDATA SIZE       =     23       8
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

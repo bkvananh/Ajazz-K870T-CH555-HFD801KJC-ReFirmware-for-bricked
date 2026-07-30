@@ -1,0 +1,76 @@
+C51 COMPILER V9.60.7.0   RGB                                                               07/30/2026 12:12:59 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE RGB
+OBJECT MODULE PLACED IN .\Objects\RGB.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE RGB.C LARGE OPTIMIZE(8,SIZE) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\
+                    -RGB.lst) TABS(2) OBJECT(.\Objects\RGB.obj)
+
+line level    source
+
+   1          /********************************** (C) COPYRIGHT *******************************
+   2          * File Name          : RGB.C
+   3          * Author             : WCH
+   4          * Version            : V1.0
+   5          * Date               : 2021/07/16
+   6          * Description        : CH555 RGB初始化相关
+   7          *******************************************************************************/
+   8          #include "RGB.H"
+   9          
+  10          /* Global Variable */ 
+  11          BOOL  data   IsCode;
+  12          UINT16D  BufferAddr;
+  13          
+  14          /* 4字节对齐 */
+  15          UINT8X  RGBdataBuffer[128][4]  _at_ 0x0000; 
+  16          UINT8X  RGBdataBuffer1[128][4] _at_ 0x0200; 
+  17          
+  18          /*******************************************************************************
+  19          * Function Name  : InitRGBLED
+  20          * Description    : RGBLED 初始化
+  21          * Input          : None
+  22          * Return         : None
+  23          *******************************************************************************/
+  24          void InitRGBLED(void)
+  25          { 
+  26   1        P4 = P2 = P1 = 0xFF;                                   // R/G/B PWM pins invert output, low action for si
+             -nk current
+  27   1        P0 = P3 = 0xFF;                                        // COMMON pin invert output, low action for drive 
+             -external PMOS
+  28   1        
+  29   1        P4_MOD_OC = P2_MOD_OC = P1_MOD_OC = 0;                 // R/G/B PWM pins push-pull output
+  30   1        P0_MOD_OC = P3_MOD_OC = 0;                             // COMMON pins push-pull output
+  31   1        
+  32   1        LED_CTRL = bLED_EN;
+  33   1        LED_CYCLE = bLED_INTEN_CYC0;                           // PWM_128@color,PWM_128@intenisy,1x bLED_COLOR_CY
+             -C|  MASK_LED_INT_CYC;//
+  34   1        LED_FRAME =  bLED_INH_TMR2|bLED_INH_TMR0;              // 101->8 intenisy PWM cycles, same PWM data repea
+             -t 1 time
+  35   1        LED_DMA = BufferAddr = (UINT16)(&RGBdataBuffer[0]);    // buffer start address 
+  36   1        IsCode = 0;                                            // indicate data@xRAM (1=data@flash ROM)
+  37   1        LED_INT_ADJ = 0x05;                                    // adjust: increase intenisy
+  38   1        LED_PWM_OE = 0xFE;
+  39   1        LED_COMMON = 0xFF;                                     // preset COMMON selection, next is 0, start @inte
+             -rrupt
+  40   1        LED_CTRL = bLED_IE_INHIB | bLED_BLUE_EN | bLED_GREEN_EN | bLED_RED_EN | bLED_COM_AHEAD |bLED_PWM_INHIB | 
+             -bLED_EN;
+  41   1        LED_STATUS |= bLED_IF_SET;                             // force bLED_IF to enter interrupt service 
+  42   1        IE_PWM_I2C = 1;
+  43   1      }
+  44          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     77    ----
+C51 COMPILER V9.60.7.0   RGB                                                               07/30/2026 12:12:59 PAGE 2   
+
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      2    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,55 @@
+C51 COMPILER V9.60.7.0   MAIN                                                              07/30/2026 15:33:46 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c LARGE OPTIMIZE(9,SIZE) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings
+                    -\main.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include "CH555.H"
+   2          #include "Debug.H"
+   3          #include "MATRIX.h"
+   4          #include "USB_HANDLER.h"
+   5          
+   6          void main(void)
+   7          {
+   8   1          CfgFsys();
+   9   1          mDelaymS(20);
+  10   1      
+  11   1          Matrix_Init();      // da bao gom cau hinh LED + ma tran phim
+  12   1          InitUSB_Device();
+  13   1          EA = 1;
+  14   1      
+  15   1          while (1)
+  16   1          {
+  17   2              if (Ready)
+  18   2              {
+  19   3                  Matrix_Scan();   // vua quet phim, vua sang LED, gop lam 1
+  20   3      
+  21   3                  if (ReportChanged)
+  22   3                  {
+  23   4                      while (Endp1Busy);
+  24   4                      Endp1Busy = 1;
+  25   4                      Send_Keyboard_Report(KeyboardReport, ENDP1_IN_SIZE);
+  26   4                  }
+  27   3              }
+  28   2      
+  29   2              mDelaymS(DEBOUNCE_MS);
+  30   2          }
+  31   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     60    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,221 @@
+C51 COMPILER V9.60.7.0   USB_HANDLER                                                       07/30/2026 14:51:32 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE USB_HANDLER
+OBJECT MODULE PLACED IN .\Objects\USB_HANDLER.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE USB_HANDLER.c LARGE OPTIMIZE(9,SIZE) BROWSE DEBUG OBJECTEXTEND PRINT(.\L
+                    -istings\USB_HANDLER.lst) TABS(2) OBJECT(.\Objects\USB_HANDLER.obj)
+
+line level    source
+
+   1          /*******************************************************************************
+   2          * File Name          : USB_HANDLER.c
+   3          * Project            : K870T Keyboard Firmware (CH555 MCU)
+   4          * Description        : X? lý ng?t USB
+   5          *******************************************************************************/
+   6          #include "USB_HANDLER.h"
+   7          
+   8          UINT8C DevDesc[] = {
+   9              0x12, 0x01, 0x10, 0x01, 0x00, 0x00, 0x00, THIS_ENDP0_SIZE,
+  10              0x86, 0x1A, 0xE1, 0xE6, 0x00, 0x01, 0x01, 0x02, 0x00, 0x01
+  11          };
+  12          
+  13          UINT8C KeyRepDesc[] = {
+  14              0x05, 0x01, 0x09, 0x06, 0xA1, 0x01, 0x05, 0x07, 0x19, 0xE0,
+  15              0x29, 0xE7, 0x15, 0x00, 0x25, 0x01, 0x75, 0x01, 0x95, 0x08,
+  16              0x81, 0x02, 0x95, 0x01, 0x75, 0x08, 0x81, 0x01, 0x95, 0x03,
+  17              0x75, 0x01, 0x05, 0x08, 0x19, 0x01, 0x29, 0x03, 0x91, 0x02,
+  18              0x95, 0x05, 0x75, 0x01, 0x91, 0x01, 0x95, 0x06, 0x75, 0x08,
+  19              0x26, 0xFF, 0x00, 0x05, 0x07, 0x19, 0x00, 0x29, 0x91, 0x81,
+  20              0x00, 0xC0
+  21          };
+  22          
+  23          UINT8C CfgDesc[] = {
+  24              0x09, 0x02, 0x22, 0x00, 0x01, 0x01, 0x00, 0xA0, 0x32,
+  25              0x09, 0x04, 0x00, 0x00, 0x01, 0x03, 0x01, 0x01, 0x00,
+  26              0x09, 0x21, 0x11, 0x01, 0x00, 0x01, 0x22, sizeof(KeyRepDesc) & 0xFF, sizeof(KeyRepDesc) >> 8,
+  27              0x07, 0x05, 0x81, 0x03, ENDP1_IN_SIZE, 0x00, 0x0A
+  28          };
+  29          
+  30          UINT8C MyLangDescr[] = { 0x04, 0x03, 0x09, 0x04 };
+  31          UINT8C MyManuInfo[]  = { 0x0E, 0x03, 'w',0, 'c',0, 'h',0, '.',0, 'c',0, 'n',0 };
+  32          UINT8C MyProdInfo[]  = { 0x0C, 0x03, 'k',0, '8',0, '7',0, '0',0, 't',0 };
+  33          
+  34          volatile UINT8 Endp1Busy = 0;
+  35          UINT8 UsbConfig = 0;
+  36          UINT8 Ready = 0;
+  37          
+  38          volatile UINT8  D0SetupReqCode = 0xFF;
+  39          volatile UINT16 D0SetupLen = 0x00;
+  40          volatile PUINT8 pD0Descr;
+  41          
+  42          #define FAST_COPY(dst, src, len) do { \
+  43              UINT8 _i; \
+  44              for (_i = 0; _i < (UINT8)(len); _i++) { \
+  45                  ((PUINT8)(dst))[_i] = ((PUINT8)(src))[_i]; \
+  46              } \
+  47          } while(0)
+  48          
+  49          void Send_Keyboard_Report(UINT8 *buf, UINT8 len)
+  50          {
+  51   1          FAST_COPY(pUSB_BUF_DEV0 + UX_EP1_ADDR, buf, len);
+  52   1          D0_EP1T_L = len;
+  53   1          D0_EP1RES = (D0_EP1RES & ~MASK_UEP_X_RES) | UEP_X_RES_ACK;
+  54   1      }
+C51 COMPILER V9.60.7.0   USB_HANDLER                                                       07/30/2026 14:51:32 PAGE 2   
+
+  55          
+  56          void USB_DeviceInterrupt(void) interrupt INT_NO_USB using 1
+  57          {
+  58   1          UINT8 us;
+  59   1          UINT16 len;
+  60   1      
+  61   1          us = USB_IF;
+  62   1          if (us & bUX_IF_D0_TRANS) {
+  63   2      USB_DevIntNext:
+  64   2              switch (D0_STATUS & (bUXS_SETUP_ACT | MASK_UXS_TOKEN | MASK_UXS_ENDP)) {
+  65   3                  case UXS_TOKEN_IN | 1:
+  66   3                  case bUXS_SETUP_ACT | UXS_TOKEN_IN | 1:
+  67   3                      D0_EP1T_L = 0;
+  68   3                      D0_EP1RES ^= bUEP_X_TOG;
+  69   3                      Endp1Busy = 0;
+  70   3                      D0_EP1RES = (D0_EP1RES & ~MASK_UEP_X_RES) | UEP_X_RES_NAK;
+  71   3                      break;
+  72   3      
+  73   3                  case UXS_TOKEN_IN | 0:
+  74   3                  case bUXS_SETUP_ACT | UXS_TOKEN_IN | 0:
+  75   3                      switch(D0SetupReqCode) {
+  76   4                          case USB_GET_DESCRIPTOR:
+  77   4                              len = D0SetupLen >= THIS_ENDP0_SIZE ? THIS_ENDP0_SIZE : D0SetupLen;
+  78   4                              FAST_COPY(pD0_EP0_BUF, pD0Descr, len);
+  79   4                              D0SetupLen -= len;
+  80   4                              pD0Descr += len;
+  81   4                              D0_EP0T_L = len;
+  82   4                              D0_EP0RES ^= bUEP_T_TOG;
+  83   4                              break;
+  84   4                          case USB_SET_ADDRESS:
+  85   4                              D0_ADDR = D0SetupLen;
+  86   4                              D0_EP0RES = UEP_R_RES_ACK | UEP_T_RES_NAK;
+  87   4                              break;
+  88   4                          default:
+  89   4                              D0_EP0T_L = 0;
+  90   4                              D0_EP0RES = UEP_R_RES_ACK | UEP_T_RES_NAK;
+  91   4                              break;
+  92   4                      }
+  93   3                      break;
+  94   3      
+  95   3                  case UXS_TOKEN_OUT | 0:
+  96   3                  case bUXS_SETUP_ACT | UXS_TOKEN_OUT | 0:
+  97   3                      D0_EP0RES ^= bUEP_R_TOG;
+  98   3                      break;
+  99   3      
+ 100   3                  default:
+ 101   3                      if ((D0_STATUS & (bUXS_SETUP_ACT | MASK_UXS_TOKEN)) == (bUXS_SETUP_ACT | UXS_TOKEN_FREE)) 
+             -{
+ 102   4                          D0_EP0RES = bUEP_R_TOG | bUEP_T_TOG | UEP_R_RES_ACK | UEP_T_RES_ACK;
+ 103   4                          D0SetupLen = ((UINT16)pD0_SETUP_REQ->wLengthH << 8) + pD0_SETUP_REQ->wLengthL;
+ 104   4                          D0SetupReqCode = pD0_SETUP_REQ->bRequest;
+ 105   4                          if (pD0_SETUP_REQ->wLengthH || D0SetupLen > 0x7F) D0SetupLen = 0x7F;
+ 106   4                          len = 0;
+ 107   4      
+ 108   4                          if ((pD0_SETUP_REQ->bRequestType & USB_REQ_TYP_MASK) == USB_REQ_TYP_STANDARD) {
+ 109   5                              switch(D0SetupReqCode) {
+ 110   6                                  case USB_GET_DESCRIPTOR:
+ 111   6                                      switch(pD0_SETUP_REQ->wValueH) {
+ 112   7                                          case 1: pD0Descr = (PUINT8)&DevDesc[0]; len = sizeof(DevDesc); break;
+ 113   7                                          case 2: pD0Descr = (PUINT8)&CfgDesc[0]; len = sizeof(CfgDesc); break;
+ 114   7                                          case 3:
+ 115   7                                              switch(pD0_SETUP_REQ->wValueL) {
+C51 COMPILER V9.60.7.0   USB_HANDLER                                                       07/30/2026 14:51:32 PAGE 3   
+
+ 116   8                                                  case 1: pD0Descr = (PUINT8)&MyManuInfo[0]; len = sizeof(MyManu
+             -Info); break;
+ 117   8                                                  case 2: pD0Descr = (PUINT8)&MyProdInfo[0]; len = sizeof(MyProd
+             -Info); break;
+ 118   8                                                  case 0: pD0Descr = (PUINT8)&MyLangDescr[0]; len = sizeof(MyLan
+             -gDescr); break;
+ 119   8                                                  default: len = 0xFF; break;
+ 120   8                                              }
+ 121   7                                              break;
+ 122   7                                          case 0x22:
+ 123   7                                              pD0Descr = (PUINT8)&KeyRepDesc[0];
+ 124   7                                              len = sizeof(KeyRepDesc);
+ 125   7                                              break;
+ 126   7                                          default: len = 0xFF; break;
+ 127   7                                      }
+ 128   6                                      if (D0SetupLen > len) D0SetupLen = len;
+ 129   6                                      len = D0SetupLen >= THIS_ENDP0_SIZE ? THIS_ENDP0_SIZE : D0SetupLen;
+ 130   6                                      FAST_COPY(pD0_EP0_BUF, pD0Descr, len);
+ 131   6                                      D0SetupLen -= len;
+ 132   6                                      pD0Descr += len;
+ 133   6                                      break;
+ 134   6      
+ 135   6                                  case USB_SET_ADDRESS: D0SetupLen = pD0_SETUP_REQ->wValueL; break;
+ 136   6                                  case USB_SET_CONFIGURATION:
+ 137   6                                      UsbConfig = pD0_SETUP_REQ->wValueL;
+ 138   6                                      if (UsbConfig) Ready = 1;
+ 139   6                                      break;
+ 140   6                                  default: len = 0xFF; break;
+ 141   6                              }
+ 142   5                          }
+ 143   4      
+ 144   4                          if (len == 0xFF) {
+ 145   5                              D0_EP0RES = bUEP_R_TOG | bUEP_T_TOG | UEP_R_RES_STALL | UEP_T_RES_STALL;
+ 146   5                          } else {
+ 147   5                              D0_EP0T_L = len;
+ 148   5                              D0_EP0RES = bUEP_R_TOG | bUEP_T_TOG | UEP_R_RES_ACK | UEP_T_RES_ACK;
+ 149   5                          }
+ 150   4                      }
+ 151   3                      break;
+ 152   3              }
+ 153   2              D0_STATUS = 0;
+ 154   2          }
+ 155   1          else if (us & bUX_IF_BUS_RST) {
+ 156   2              D0_EP0RES = UEP_R_RES_ACK | UEP_T_RES_NAK;
+ 157   2              D0_EP1RES = UEP_X_RES_NAK;
+ 158   2              D0_EP_MOD = bUX_DEV_EN;
+ 159   2              D0_ADDR = 0;
+ 160   2              HB_ADDR = 0x7F;
+ 161   2              USB_IF = 0xFF;
+ 162   2              Endp1Busy = 0;
+ 163   2              Ready = 0;
+ 164   2              USB_IE = bUX_IE_SUSPEND | bUX_IE_TRANSFER | bUX_IE_BUS_RST;
+ 165   2              USB_IF |= bUX_IF_BUS_RST;
+ 166   2          }
+ 167   1          else if (us & bUX_IF_SUSPEND) {
+ 168   2              USB_IF |= bUX_IF_SUSPEND;
+ 169   2              D0_STATUS = 0;
+ 170   2          }
+ 171   1      
+ 172   1          if (USB_IF & bUX_IF_D0_TRANS) goto USB_DevIntNext;
+ 173   1      }
+ 174          
+C51 COMPILER V9.60.7.0   USB_HANDLER                                                       07/30/2026 14:51:32 PAGE 4   
+
+ 175          void InitUSB_Device(void)
+ 176          {
+ 177   1          IE_USB = 0;
+ 178   1          USB_CTRL = 0;
+ 179   1          D0_EP_MOD = bUX_DEV_EN;
+ 180   1          D0_EP1T_L = 0;
+ 181   1          D0_ADDR = 0;
+ 182   1          HB_ADDR = 0x7F;
+ 183   1          USB_IF = 0xFF;
+ 184   1          USB_IE = bUX_IE_SUSPEND | bUX_IE_TRANSFER | bUX_IE_BUS_RST;
+ 185   1          USB_CTRL = bUX_DP_PU_EN;
+ 186   1          IE_USB = 1;
+ 187   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    872    ----
+   CONSTANT SIZE    =    144    ----
+   XDATA SIZE       =      9       8
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
