@@ -1,0 +1,6 @@
+".\Objects\Debug.obj",
+".\Objects\MATRIX.obj",
+".\Objects\main.obj",
+".\Objects\USB_HANDLER.obj" 
+TO ".\Objects\K870T" 
+PRINT(".\Listings\K870T.m51") RAMSIZE(256) 
