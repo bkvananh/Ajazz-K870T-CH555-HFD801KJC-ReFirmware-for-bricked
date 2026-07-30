@@ -1,6 +1,4 @@
-code = '''
-# Markdown content for README.md
-readme_content = """# Ajazz K870T Custom/Restoration Firmware (CH555 / HFD801KJC)
+ """# Ajazz K870T Custom/Restoration Firmware (CH555 / HFD801KJC)
 
 > A minimal, custom open-source firmware designed to unbrick and restore basic functionality for the **Ajazz K870T** mechanical keyboard featuring the **HFD801KJC** MCU.
 
