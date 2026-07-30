@@ -36,6 +36,7 @@ Using base EVT examples provided in [HorrorTroll/WCH_CH555](https://github.com/H
 * ⚠️ No FN key / Layer support.
 * ⚠️ No Bluetooth support (USB Wired only).
 * ⚠️ No QMK / VIA support.
+* ⚠️ No Nkey rollover
 
 ---
 
