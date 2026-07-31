@@ -4,17 +4,19 @@ UINT8C BitMask[8] = {0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80};
 
 UINT8C KeyMap[MATRIX_ROWS][MATRIX_COLS] = {
     { KC_ESC,  KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,   KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  KC_PSCR, KC_SLCK, KC_PAUS, KC_NO   },
-    { KC_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  KC_BSPC, KC_INS,  KC_HOME, KC_PGUP },
-    { KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, KC_BSLS, KC_DEL,  KC_END,  KC_PGDN },
-    { KC_CAPS, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_NO,   KC_ENT,  KC_NO,   KC_NO,   KC_NO   },
+    { KC_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  KC_BSPC, KC_INS,  KC_HOME, KC_NO   },
+    { KC_TAB,  KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,    KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, KC_BSLS, KC_DEL,  KC_END,  KC_NO   },
+    { KC_CAPS, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,    KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT, KC_NO,   KC_ENT,  KC_PGUP, KC_PGDN, KC_NO   },
     { MOD_LSFT,KC_NO,   KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,    KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, MOD_RSFT,KC_NO,   KC_UP,   KC_NO,   KC_NO   },
-    { MOD_LCTL,MOD_LGUI,MOD_LALT,KC_NO,   KC_SPC,  KC_NO,   KC_NO,   MOD_RALT,KC_LED_TOG, KC_APP, MOD_RCTL,KC_LEFT, KC_DOWN, KC_RGHT, KC_NO,   KC_NO,   KC_NO   }
+    { MOD_LCTL,MOD_LGUI,MOD_LALT,KC_NO,   KC_SPC,  KC_LED_TOG, KC_NO,   MOD_RALT,KC_NO,   KC_APP,  MOD_RCTL,KC_LEFT, KC_DOWN, KC_RGHT, KC_NO,   KC_NO,   KC_NO   }
 };
 
-/* D?i 32 bu?c m√†u Pastel pha Tr?ng li?n m?ch tuy?t d?i (Bi?n thi√™n max 1 n?c/bu?c) */
-UINT8C Palette_R[32] = {2,2,2,2,2,2,2,1,1,1,1,0,0,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2};
-UINT8C Palette_G[32] = {1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,1,1};
-UINT8C Palette_B[32] = {1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,2,2,1,1,1};
+/* B?ng 16 bu?c m‡u chu?n x·c d?i Hex (Ti?t ki?m 48 bytes ROM):
+ * 0..2: #884499 | 3..5: #BB6688 | 6..11: #8888CC | 12..15: #DDAACC
+ */
+UINT8C Palette_R[16] = {2,2,2, 2,2,2, 1,1,1,1,1,1, 2,2,2,2};
+UINT8C Palette_G[16] = {0,0,0, 1,1,1, 1,1,1,1,1,1, 1,1,1,1};
+UINT8C Palette_B[16] = {2,2,2, 1,1,1, 2,2,2,2,2,2, 2,2,2,2};
 
 UINT8X KeyboardReport[ENDP1_IN_SIZE];
 UINT8 ReportChanged = 0;
@@ -34,8 +36,10 @@ void Matrix_Init(void)
     P7 |= (bP7_0_DIR | bP7_1_DIR | bP7_0_OUT_PU | bP7_1_OUT_PU);
     P3_MOD_OC &= ~0xFE; P3_DIR_PU |= 0xFE; P3 = 0xFF;
 
-    P2_MOD_OC &= ~0xFF; P2_DIR_PU |= 0xFF; P2 = 0xFF;
-    P1_MOD_OC &= ~0xFF; P1_DIR_PU |= 0xFF; P1 = 0xFF;
+    P2_MOD_OC &= ~0x3F; P2_DIR_PU |= 0x3F; P2 |= 0x3F;
+    P1_MOD_OC &= ~0x3F; P1_DIR_PU |= 0x3F;
+
+    P1_MOD_OC |= 0xC0; P1_DIR_PU |= 0xC0; P1_7 = 1; P1_6 = 1;
     P4_MOD_OC |= 0xFF; P4_DIR_PU |= 0xFF; P4 = 0xFF;
 
     for (i = 0; i < ENDP1_IN_SIZE; i++) {
@@ -55,21 +59,21 @@ void Matrix_Scan(void)
     for (i = 0; i < ENDP1_IN_SIZE; i++) KeyboardReport[i] = 0;
 
     FrameCnt++;
-    toggle = FrameCnt & 0x01; // C? pha m√†u 50%
+    toggle = FrameCnt & 0x01;
 
-    /* Nh√≠ch 1 vi bu?c m√†u sau m?i 22 lu?t qu√©t */
-    if (++HueTick >= 22) {
+    /* NhÌch 1 n?c m‡u sau m?i 35 lu?t quÈt */
+    if (++HueTick >= 35) {
         HueTick = 0;
-        HueShift = (HueShift + 1) & 0x1F;
+        HueShift = (HueShift + 1) & 0x0F; // …p d?i 16 steps (& 0x0F)
     }
 
     for (c = 0; c < MATRIX_COLS; c++) {
-        /* ---- Pha 1: Qu√©t m√†u LED t?ng c?t ---- */
+        /* ---- Pha 1: QuÈt m‡u LED ---- */
         if (LedOn) {
 #if RAINBOW_REVERSE
-            idx = (HueShift - c) & 0x1F;
+            idx = (HueShift - c) & 0x0F;
 #else
-            idx = (HueShift + c) & 0x1F;
+            idx = (HueShift + c) & 0x0F;
 #endif
             col_r = Palette_R[idx];
             col_g = Palette_G[idx];
@@ -79,12 +83,11 @@ void Matrix_Scan(void)
         }
 
         P2 = (col_g > toggle) ? 0x00 : 0xFF;
-        P1 = (col_b > toggle) ? 0x00 : 0xFF;
+        P1 = 0xC0 | ((col_b > toggle) ? 0x00 : 0x3F);
 
-        P4_MOD_OC &= ~0xFF;          /* P4 Output Push-pull (K√™nh √ê?) */
+        P4_MOD_OC &= ~0xFF;
         P4 = (col_r > toggle) ? 0x00 : 0xFF;
 
-        /* Inline k√©o C?t xu?ng LOW */
         P0 = 0xFF; P7 |= (bP7_0_OUT_PU | bP7_1_OUT_PU); P3 = 0xFF;
         if (c < 8) P0 = ~BitMask[c];
         else if (c == 8) P7 &= ~bP7_1_OUT_PU;
@@ -94,8 +97,8 @@ void Matrix_Scan(void)
 
         mDelayuS(5);
 
-        /* ---- Pha 2: Chuy?n P4 d?c Ma tr?n ph√≠m ---- */
-        P4_MOD_OC |= 0xFF;           /* P4 Quasi-bidirectional */
+        /* ---- Pha 2: QuÈt ma tr?n phÌm ---- */
+        P4_MOD_OC |= 0xFF;
         P4 = 0xFF;
         mDelayuS(5);
 
@@ -131,7 +134,7 @@ void Matrix_Scan(void)
     P0 = 0xFF; P7 |= (bP7_0_OUT_PU | bP7_1_OUT_PU); P3 = 0xFF;
     P2 = 0xFF; P1 = 0xFF; P4 = 0xFF;
 
-    /* Inline d?c Encoder */
+    /* ---- X? l˝ con lan P1.7 / P1.6 ---- */
     curr_a = ENCODER_PAD_A;
     if (last_a == 1 && curr_a == 0) {
         KeyboardReport[2] = (ENCODER_PAD_B == 1) ? KC_VOLU : KC_VOLD;

@@ -1,8 +1,3 @@
-/*******************************************************************************
-* File Name          : KEYBOARD_CONFIG.h
-* Project            : K870T Keyboard Firmware (CH555 MCU)
-* Description        : Khai báo Ma tr?n 6x17 & Bi?n di?u khi?n LED
-*******************************************************************************/
 #ifndef __KEYBOARD_CONFIG_H__
 #define __KEYBOARD_CONFIG_H__
 
@@ -116,9 +111,10 @@
 #define MOD_RGUI            0xE7
 
 extern UINT8C KeyMap[MATRIX_ROWS][MATRIX_COLS];
-extern UINT8 LedOn; // Khai báo extern d? main.c truy c?p tr?c ti?p
+extern UINT8 LedOn;
 
-sbit ENCODER_PAD_A = P2^7;          
-sbit ENCODER_PAD_B = P3^7;          
+/* C?u hình chính xác chân con lan P1.7 và P1.6 */
+sbit ENCODER_PAD_A = P1^7;          
+sbit ENCODER_PAD_B = P1^6;          
 
 #endif
