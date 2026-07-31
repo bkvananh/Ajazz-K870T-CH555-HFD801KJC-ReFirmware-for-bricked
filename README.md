@@ -1,6 +1,6 @@
 # Ajazz K870T Custom/Restoration Firmware (CH555 / HFD801KJC)
 
-![PCB](/image/IMG_0595.jpeg)
+![kb](/image/B0D48CE3-C793-4D5A-9094-87E7643CCC86.jpeg)
 > A minimal, custom open-source firmware designed to unbrick and restore basic functionality for the **Ajazz K870T** mechanical keyboard featuring the **HFD801KJC** MCU.
 
 ---
@@ -16,7 +16,8 @@ Due to conflicting firmware revisions distributed online, many users accidentall
 Attempting to recover the keyboard using official channels proved difficult—Ajazz appears to have removed the legacy firmware files from their official website due to high return/brick rates. 
 
 * **For HFD2201KBA (Sonix) Users:** You are in luck! Check out the [SonixQMK](https://github.com/SonixQMK) project. Furthermore, HFD2201KBA shares firmware compatibility with the *Rakk Lam-ang Pro* (which uses the VS11K09A-1 chip).
-* **For HFD801KJC (CH555) Users:** Standard QMK for 8051 ports are overly complex, requiring extensive GPIO remapping and low-level adjustments. 
+* **For HFD801KJC (CH555) Users:** Standard QMK for 8051 ports are overly complex, requiring extensive GPIO remapping and low-level adjustments.
+![PCB](/image/IMG_0593.jpeg)
 
 ### How This Firmware Was Created
 Using base EVT examples provided in [HorrorTroll/WCH_CH555](https://github.com/HorrorTroll/WCH_CH555), a lightweight recovery firmware was developed with the assistance of LLMs (Gemini / Claude). It is compiled using **Keil µVision5** and flashed via **WCHISPStudio**. (Pardon the experimental "vibe code", but it successfully revives dead boards!)
