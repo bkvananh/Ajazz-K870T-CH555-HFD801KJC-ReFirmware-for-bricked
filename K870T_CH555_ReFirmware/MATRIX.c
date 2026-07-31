@@ -11,10 +11,10 @@ UINT8C KeyMap[MATRIX_ROWS][MATRIX_COLS] = {
     { MOD_LCTL,MOD_LGUI,MOD_LALT,KC_NO,   KC_SPC,  KC_NO,   KC_NO,   MOD_RALT,KC_LED_TOG, KC_APP, MOD_RCTL,KC_LEFT, KC_DOWN, KC_RGHT, KC_NO,   KC_NO,   KC_NO   }
 };
 
-/* B?ng 32 vi bu?c chuy?n màu liên t?c siêu m?n */
-UINT8C Palette_R[32] = {2,2,2,2,2,2,1,1,0,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2};
-UINT8C Palette_G[32] = {0,0,1,1,2,2,2,2,2,2,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,2,2,2,1,1};
-UINT8C Palette_B[32] = {0,0,0,0,0,0,0,0,1,1,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,0,0,0,0};
+/* D?i 32 bu?c mÃ u Pastel pha Tr?ng li?n m?ch tuy?t d?i (Bi?n thiÃªn max 1 n?c/bu?c) */
+UINT8C Palette_R[32] = {2,2,2,2,2,2,2,1,1,1,1,0,0,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2};
+UINT8C Palette_G[32] = {1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,1,1};
+UINT8C Palette_B[32] = {1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,2,2,1,1,1};
 
 UINT8X KeyboardReport[ENDP1_IN_SIZE];
 UINT8 ReportChanged = 0;
@@ -55,16 +55,16 @@ void Matrix_Scan(void)
     for (i = 0; i < ENDP1_IN_SIZE; i++) KeyboardReport[i] = 0;
 
     FrameCnt++;
-    toggle = FrameCnt & 0x01; // C? pha màu 50%
+    toggle = FrameCnt & 0x01; // C? pha mÃ u 50%
 
-    /* Nhích vi bu?c liên t?c sau m?i 22 lu?t quét */
+    /* NhÃ­ch 1 vi bu?c mÃ u sau m?i 22 lu?t quÃ©t */
     if (++HueTick >= 22) {
         HueTick = 0;
         HueShift = (HueShift + 1) & 0x1F;
     }
 
     for (c = 0; c < MATRIX_COLS; c++) {
-        /* ---- Pha 1: Quét màu LED t?ng vi bu?c ---- */
+        /* ---- Pha 1: QuÃ©t mÃ u LED t?ng c?t ---- */
         if (LedOn) {
 #if RAINBOW_REVERSE
             idx = (HueShift - c) & 0x1F;
@@ -81,10 +81,10 @@ void Matrix_Scan(void)
         P2 = (col_g > toggle) ? 0x00 : 0xFF;
         P1 = (col_b > toggle) ? 0x00 : 0xFF;
 
-        P4_MOD_OC &= ~0xFF;          /* P4 Output Push-pull (Kênh Ð?) */
+        P4_MOD_OC &= ~0xFF;          /* P4 Output Push-pull (KÃªnh Ã?) */
         P4 = (col_r > toggle) ? 0x00 : 0xFF;
 
-        /* Inline kéo C?t xu?ng LOW */
+        /* Inline kÃ©o C?t xu?ng LOW */
         P0 = 0xFF; P7 |= (bP7_0_OUT_PU | bP7_1_OUT_PU); P3 = 0xFF;
         if (c < 8) P0 = ~BitMask[c];
         else if (c == 8) P7 &= ~bP7_1_OUT_PU;
@@ -94,7 +94,7 @@ void Matrix_Scan(void)
 
         mDelayuS(5);
 
-        /* ---- Pha 2: Chuy?n P4 d?c Ma tr?n phím ---- */
+        /* ---- Pha 2: Chuy?n P4 d?c Ma tr?n phÃ­m ---- */
         P4_MOD_OC |= 0xFF;           /* P4 Quasi-bidirectional */
         P4 = 0xFF;
         mDelayuS(5);
