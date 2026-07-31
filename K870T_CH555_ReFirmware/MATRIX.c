@@ -11,9 +11,7 @@ UINT8C KeyMap[MATRIX_ROWS][MATRIX_COLS] = {
     { MOD_LCTL,MOD_LGUI,MOD_LALT,KC_NO,   KC_SPC,  KC_LED_TOG, KC_NO,   MOD_RALT,KC_NO,   KC_APP,  MOD_RCTL,KC_LEFT, KC_DOWN, KC_RGHT, KC_NO,   KC_NO,   KC_NO   }
 };
 
-/* B?ng 16 bu?c màu chu?n xác d?i Hex (Ti?t ki?m 48 bytes ROM):
- * 0..2: #884499 | 3..5: #BB6688 | 6..11: #8888CC | 12..15: #DDAACC
- */
+/* B?ng 16 bu?c màu chu?n d?i Hex */
 UINT8C Palette_R[16] = {2,2,2, 2,2,2, 1,1,1,1,1,1, 2,2,2,2};
 UINT8C Palette_G[16] = {0,0,0, 1,1,1, 1,1,1,1,1,1, 1,1,1,1};
 UINT8C Palette_B[16] = {2,2,2, 1,1,1, 2,2,2,2,2,2, 2,2,2,2};
@@ -61,10 +59,9 @@ void Matrix_Scan(void)
     FrameCnt++;
     toggle = FrameCnt & 0x01;
 
-    /* Nhích 1 n?c màu sau m?i 35 lu?t quét */
     if (++HueTick >= 35) {
         HueTick = 0;
-        HueShift = (HueShift + 1) & 0x0F; // Ép d?i 16 steps (& 0x0F)
+        HueShift = (HueShift + 1) & 0x0F;
     }
 
     for (c = 0; c < MATRIX_COLS; c++) {
@@ -134,10 +131,10 @@ void Matrix_Scan(void)
     P0 = 0xFF; P7 |= (bP7_0_OUT_PU | bP7_1_OUT_PU); P3 = 0xFF;
     P2 = 0xFF; P1 = 0xFF; P4 = 0xFF;
 
-    /* ---- X? lý con lan P1.7 / P1.6 ---- */
+    /* ---- X? lý con lan P1.7 / P1.6: Lan lên = PageUp, Lan xu?ng = PageDown ---- */
     curr_a = ENCODER_PAD_A;
     if (last_a == 1 && curr_a == 0) {
-        KeyboardReport[2] = (ENCODER_PAD_B == 1) ? KC_VOLU : KC_VOLD;
+        KeyboardReport[2] = (ENCODER_PAD_B == 1) ? KC_PGUP : KC_PGDN;
     }
     last_a = curr_a;
 
