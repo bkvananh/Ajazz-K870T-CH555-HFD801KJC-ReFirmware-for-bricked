@@ -25,7 +25,7 @@ UINT8C SpecTable_B[SPECIFIED_TABLE_SIZE] = {
     9, 9, 9, 8, 8,   8, 9, 10, 11, 11,  12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 11, 11, 10, 10
 };
 
-/* --- B?ng màu Ch? d? 2 & 3: C?u v?ng 7 s?c tông Pastel (Thang di?m 0-15) --- */
+/* --- B?ng màu Ch? d? 2 & 3: C?u v?ng 7 s?c tông Pastel --- */
 #define PASTEL_TABLE_SIZE 35
 UINT8C PastelWheel_R[PASTEL_TABLE_SIZE] = {
     10, 9, 7, 6, 5,  5, 5, 5, 5, 5,  7, 9, 11, 13, 14,  15, 15, 15, 15, 15,  15, 15, 15, 14, 14,  13, 12, 11, 10, 10,  10, 10, 10, 10, 10
@@ -37,7 +37,7 @@ UINT8C PastelWheel_B[PASTEL_TABLE_SIZE] = {
     14, 14, 15, 15, 15,  13, 11, 9, 8, 7,  6, 5, 5, 5, 5,  5, 5, 6, 6, 7,  8, 10, 12, 13, 14,  14, 14, 14, 14, 14,  14, 14, 14, 14, 14
 };
 
-/* --- B?ng màu Ch? d? 4: 2 màu Hex (#CCAA88 & #8888CC) cu?n d?c tu?n hoàn --- */
+/* --- B?ng màu Ch? d? 4: 2 màu Hex (#CCAA88 & #8888CC) --- */
 #define DUAL_TABLE_SIZE 20
 UINT8C DualTable_R[DUAL_TABLE_SIZE] = {
     12, 12, 11, 11, 10,  10, 9, 9, 8, 8,  8, 8, 9, 9, 10,  10, 11, 11, 12, 12
@@ -49,7 +49,7 @@ UINT8C DualTable_B[DUAL_TABLE_SIZE] = {
     8, 8, 9, 9, 10,  10, 11, 11, 12, 12,  12, 12, 11, 11, 10,  10, 9, 9, 8, 8
 };
 
-/* --- Ch? d? 3: B?ng ánh x? t?a d? ma tr?n 4x4 xoay theo kim d?ng h? --- */
+/* --- Ch? d? 3: B?ng ánh x? ma tr?n 4x4 xoay theo kim d?ng h? --- */
 UINT8C Zone4x4_Map[4][4] = {
     { 0,  1,  2,  3 },
     { 11, 12, 13, 4 },
@@ -64,11 +64,10 @@ static UINT8X PrevReport[ENDP1_IN_SIZE];
 UINT8 LedMode = LED_MODE_SPECIFIED_ROLLING;
 static UINT8 LedKeyDebounce = 0;
 
-/* B? d?m th?i gian hi?u ?ng chung cho t?t c? các ch? d? (d?m b?o t?c d? d?ng nh?t) */
+/* B? d?m th?i gian hi?u ?ng chung */
 static UINT8 AnimPhase = 0;
 static UINT8 AnimTick = 0;
 
-/* S? d?ng 16 m?c PWM (0-15) d? hi?n th? mã Hex c?c k? chính xác */
 #define PWM_LEVELS 16
 
 void Matrix_Init(void)
@@ -103,48 +102,48 @@ void Matrix_Scan(void)
 
     for (i = 0; i < ENDP1_IN_SIZE; i++) KeyboardReport[i] = 0;
 
-    /* --- C?p nh?t nh?p ho?t hình chung (Ch?m & mu?t cho c? 4 ch? d?) --- */
-    if (++AnimTick >= 12) {
+    /* --- C?p nh?t nh?p chuy?n d?ng (Tang t?c d? lên ~20% v?i threshold 10) --- */
+    if (++AnimTick >= 10) {
         AnimTick = 0;
         AnimPhase++;
     }
 
     for (c = 0; c < MATRIX_COLS; c++) {
         
-        /* 1. Xác d?nh màu s?c cho t?ng phím (r, c) theo Ch? d? LED dang ch?n */
+        /* 1. Tính toán màu s?c (S? d?ng bu?c nh?y nhân dôi/ba d? thu h?p di?n tích màu) */
         for (r = 0; r < MATRIX_ROWS; r++) {
             switch (LedMode)
             {
                 case LED_MODE_SPECIFIED_ROLLING:
-                    /* Ch? d? 1: 5 màu Hex ch? d?nh, cu?n t? Trái sang Ph?i */
-                    idx = (SPECIFIED_TABLE_SIZE + AnimPhase - c) % SPECIFIED_TABLE_SIZE;
+                    /* Ch? d? 1: Bu?c nh?y (c * 2) d?m b?o xu?t hi?n ít nh?t 3-4 màu cùng lúc */
+                    idx = (SPECIFIED_TABLE_SIZE * 100 + AnimPhase - c * 2) % SPECIFIED_TABLE_SIZE;
                     cell_r[r] = SpecTable_R[idx];
                     cell_g[r] = SpecTable_G[idx];
                     cell_b[r] = SpecTable_B[idx];
                     break;
 
                 case LED_MODE_PASTEL_RAINBOW:
-                    /* Ch? d? 2: C?u v?ng 7 s?c pastel, cu?n t? Trái sang Ph?i */
-                    idx = (PASTEL_TABLE_SIZE + AnimPhase - c) % PASTEL_TABLE_SIZE;
+                    /* Ch? d? 2: Bu?c nh?y (c * 2) cho phép d?i c?u v?ng xu?t hi?n tr?n v?n 7 màu */
+                    idx = (PASTEL_TABLE_SIZE * 100 + AnimPhase - c * 2) % PASTEL_TABLE_SIZE;
                     cell_r[r] = PastelWheel_R[idx];
                     cell_g[r] = PastelWheel_G[idx];
                     cell_b[r] = PastelWheel_B[idx];
                     break;
 
                 case LED_MODE_ZONE_ROTATE_4X4:
-                    /* Ch? d? 3: Chia ma tr?n 4x4, xoay d?i màu theo kim d?ng h? */
+                    /* Ch? d? 3: Ma tr?n 4x4 th? hi?n d?ng th?i nhi?u tông màu pastel xoay quanh */
                     rz = (r == 0) ? 0 : ((r <= 2) ? 1 : ((r <= 4) ? 2 : 3));
                     cz = (c < 4) ? 0 : ((c < 8) ? 1 : ((c < 12) ? 2 : 3));
                     pos = Zone4x4_Map[rz][cz];
-                    tblIdx = (pos * 3 + AnimPhase) % PASTEL_TABLE_SIZE;
+                    tblIdx = (pos * 2 + AnimPhase) % PASTEL_TABLE_SIZE;
                     cell_r[r] = PastelWheel_R[tblIdx];
                     cell_g[r] = PastelWheel_G[tblIdx];
                     cell_b[r] = PastelWheel_B[tblIdx];
                     break;
 
                 case LED_MODE_VERTICAL_DUAL:
-                    /* Ch? d? 4: Cu?n t? Trên xu?ng Du?i 2 màu #CCAA88 và #8888CC */
-                    idx = (DUAL_TABLE_SIZE + AnimPhase - r) % DUAL_TABLE_SIZE;
+                    /* Ch? d? 4: Bu?c nh?y d?c (r * 3) t?o d?i màu bi?n d?i rõ r?t trên 6 hàng */
+                    idx = (DUAL_TABLE_SIZE * 100 + AnimPhase - r * 3) % DUAL_TABLE_SIZE;
                     cell_r[r] = DualTable_R[idx];
                     cell_g[r] = DualTable_G[idx];
                     cell_b[r] = DualTable_B[idx];
@@ -165,7 +164,7 @@ void Matrix_Scan(void)
         else if (c == 16) P3 &= ~0x02;
         else P3 &= ~BitMask[c - 8];
 
-        /* 3. Phát xung PWM 16 c?p d? cho t?ng hàng t?i c?t c */
+        /* 3. Phát xung PWM 16 c?p d? */
         for (sub = 0; sub < PWM_LEVELS; sub++) {
             mask_r = 0; mask_g = 0; mask_b = 0;
             for (r = 0; r < MATRIX_ROWS; r++) {
@@ -207,7 +206,7 @@ void Matrix_Scan(void)
         }
     }
 
-    /* X? lý b?m phím d?i Ch? d? LED */
+    /* X? lý chuy?n d?i ch? d? LED */
     if (led_key_pressed) {
         if (!LedKeyDebounce) {
             LedMode++;
@@ -221,12 +220,12 @@ void Matrix_Scan(void)
     P0 = 0xFF; P7 |= (bP7_0_OUT_PU | bP7_1_OUT_PU); P3 = 0xFF;
     P2 = 0xFF; P1 = 0xFF; P4 = 0xFF;
 
-    /* Ð?c Encoder */
+    /* --- X? LÝ NÚM XOAY: TANG / GI?M ÂM LU?NG (Volume Up / Down) --- */
     curr_a = ENCODER_PAD_A;
     if (last_a == 1 && curr_a == 0) {
-        KeyboardReport[2] = (ENCODER_PAD_B == 1) ? KC_PGUP : KC_PGDN;
+        KeyboardReport[2] = (ENCODER_PAD_B == 1) ? KC_VOLU : KC_VOLD;
     }
-    last_a = curr_a; 
+    last_a = curr_a;
 
     ReportChanged = 0;
     for (i = 0; i < ENDP1_IN_SIZE; i++) {
