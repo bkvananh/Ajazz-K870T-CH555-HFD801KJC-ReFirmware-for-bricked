@@ -1,5 +1,6 @@
 # Ajazz K870T Custom/Restoration Firmware (CH555 / HFD801KJC)
 
+![PCB](/image/IMG_0595.jpeg)
 > A minimal, custom open-source firmware designed to unbrick and restore basic functionality for the **Ajazz K870T** mechanical keyboard featuring the **HFD801KJC** MCU.
 
 ---
