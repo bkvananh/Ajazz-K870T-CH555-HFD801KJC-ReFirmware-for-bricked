@@ -4,7 +4,7 @@
 #include "CH555.H"
 
 #define ENDP1_IN_SIZE       8  
-#define RAINBOW_REVERSE     1
+#define RAINBOW_REVERSE     0   /* 0: Cuon tu Trai sang Phai */
 #define MATRIX_ROWS         6       
 #define MATRIX_COLS         17      
 #define DEBOUNCE_MS         5       
@@ -110,10 +110,17 @@
 #define MOD_RALT            0xE6
 #define MOD_RGUI            0xE7
 
-extern UINT8C KeyMap[MATRIX_ROWS][MATRIX_COLS];
-extern UINT8 LedOn;
+/* === DANH SÁCH CH? Ð? LED === */
+#define LED_MODE_SPECIFIED_ROLLING  0   /* Che do 1: 5 mau Hex chi dinh, cuon ngang tu trai sang phai */
+#define LED_MODE_PASTEL_RAINBOW     1   /* Che do 2: Cau vong 7 sac pastel, cuon sang phai muot ma */
+#define LED_MODE_ZONE_ROTATE_4X4    2   /* Che do 3: Cau vong 7 sac pastel, chia ma tran 4x4 xoay kim dong ho */
+#define LED_MODE_VERTICAL_DUAL      3   /* Che do 4: Cuon tu tren xuong duoi 2 mau #CCAA88 va #8888CC */
+#define LED_MODE_OFF                4   /* Tat LED */
+#define LED_MODE_COUNT              5
 
-/* C?u hình chính xác chân con lan P1.7 và P1.6 */
+extern UINT8C KeyMap[MATRIX_ROWS][MATRIX_COLS];
+extern UINT8 LedMode;
+
 sbit ENCODER_PAD_A = P1^7;          
 sbit ENCODER_PAD_B = P1^6;          
 
