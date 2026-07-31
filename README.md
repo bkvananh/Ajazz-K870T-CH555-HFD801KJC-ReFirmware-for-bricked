@@ -30,7 +30,6 @@ Using base EVT examples provided in [HorrorTroll/WCH_CH555](https://github.com/H
 * ✅ **Fn Key Handling:** Disabled/turned off the LED on the original Fn key slot.
 
 ### Known Limitations & Bugs
-* ⚠️ **Non-functional Keys:** `PgUp` and `PgDn` keys are currently non-responsive (PRs/contributions welcomed!).
 * ⚠️ Single lighting mode (no dynamic effect switching yet).
 * ⚠️ LED effects can occasionally jitter or misbehave.
 * ⚠️ No FN key / Layer support.
@@ -79,7 +78,6 @@ K870T_CH555_ReFirmware/Objects/K870T.hex
 ## 🤝 Contributing & Help Wanted
 
 If you have experience with 8051 assembly/C or GPIO pin mapping for the CH555/HFD801KJC controller, feel free to open a Pull Request! Specifically, help is needed to:
-* Fix the `PgUp` and `PgDn` key matrix mapping.
 * Implement proper Fn layers and secondary key functions.
 * Add selectable RGB backlight modes.
 
