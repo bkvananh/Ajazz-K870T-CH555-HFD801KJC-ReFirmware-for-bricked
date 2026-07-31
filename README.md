@@ -10,6 +10,7 @@
 The **Ajazz K870T** mechanical keyboard was manufactured with at least two distinct MCU revisions:
 1. **HFD2201KBA** (Sonix clone)
 2. **HFD801KJC** (Older batch, clone of WCH CH555 / 8051 architecture)
+![HFD801KJC](/image/IMG_0594.jpeg)
 
 Due to conflicting firmware revisions distributed online, many users accidentally flashed firmware intended for the Sonix variant onto the CH555 variant (or vice versa), completely bricking their keyboards. 
 
