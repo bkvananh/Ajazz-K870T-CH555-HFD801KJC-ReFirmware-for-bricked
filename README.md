@@ -26,7 +26,7 @@ Using base EVT examples provided in [HorrorTroll/WCH_CH555](https://github.com/H
 
 ### Working Features
 * ✅ **Core Restoration:** Unbricks the keyboard and restores basic typing capabilities via USB connection.
-* ✅ **RGB Backlighting:** Basic rainbow dynamic lighting effect.
+* ✅ **RGB Backlighting:** Basic rainbow dynamic lighting effect. (niigo palette updated hehe)
 * ✅ **Fn Key Handling:** Disabled/turned off the LED on the original Bluetooth button.
 
 ### Known Limitations & Bugs
