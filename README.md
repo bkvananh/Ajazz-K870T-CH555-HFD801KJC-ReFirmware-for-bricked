@@ -153,8 +153,8 @@ K870T_CH555_ReFirmware/Objects/K870T.hex
 Locate the **BOOT** pads on the PCB.
 
 <p align="center">
-  <img src="/image/IMG_0593.jpeg" width="48%">
-  <img src="/image/IMG_0594.jpeg" width="48%">
+  <img src="/image/IMG_0593.jpeg" width="100%">
+ 
 </p>
 
 They are positioned to the **left of the Spacebar switch**.
