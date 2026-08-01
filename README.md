@@ -83,9 +83,9 @@ Development started from the EVT examples in **[HorrorTroll/WCH_CH555](https://g
 
 * USB keyboard functionality
 * Basic key matrix scanning
-* RGB backlight (4 modes)
+* RGB backlight (4 modes/change or turn of by Original Bluetooth button)
 * Keyboard recovery from bootloader
-* Original Bluetooth LED disabled
+
 
 ## Not Yet Implemented
 
