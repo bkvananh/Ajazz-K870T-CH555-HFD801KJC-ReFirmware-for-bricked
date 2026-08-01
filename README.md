@@ -1,5 +1,6 @@
 # Ajazz K870T Recovery Firmware (CH555 / HFD801KJC)
 
+![Ajazz K870T](/image/B0D48CE3-C793-4D5A-9094-87E7643CCC86.jpeg)
 Minimal open-source firmware for restoring and reviving the **Ajazz K870T** equipped with the **HFD801KJC** microcontroller (WCH CH555 compatible).
 
 ---
@@ -36,6 +37,7 @@ This project provides a lightweight firmware capable of restoring basic USB func
 # Hardware Variants
 
 ## HFD801KJC (CH555)
+![HFD801KJC](/image/IMG_0594.jpeg)
 
 Older production batches use the **HFD801KJC**, an MCU compatible with the WCH CH555 (8051 architecture).
 
@@ -52,6 +54,14 @@ RAKK Lam-Ang Pro (Sonix)
 The CH555 version of the RAKK keyboard uses different hardware.
 
 RAKK Lam-Ang Pro (CH555)
+<p align="center">
+  <img src="/image/rakk@Xelus.jpg" width="45%">
+  <img src="/image/rakk@Jikeneu.jpg" width="45%">
+</p>
+
+<p align="center">
+  <em>RAKK Lam-Ang Pro (Sonix) &nbsp;&nbsp;&nbsp;&nbsp; RAKK Lam-Ang Pro (CH555)</em>
+</p>
 
 ---
 
@@ -137,6 +147,11 @@ K870T_CH555_ReFirmware/Objects/K870T.hex
 ## Enter Bootloader
 
 Locate the **BOOT** pads on the PCB.
+
+<p align="center">
+  <img src="/image/IMG_0593.jpeg" width="48%">
+  <img src="/image/IMG_0594.jpeg" width="48%">
+</p>
 
 They are positioned to the **left of the Spacebar switch**.
 
