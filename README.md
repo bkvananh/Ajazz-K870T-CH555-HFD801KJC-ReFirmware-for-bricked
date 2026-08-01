@@ -117,7 +117,7 @@ Development started from the EVT examples in **[HorrorTroll/WCH_CH555](https://g
 > Silicon Labs provides free PK51 licenses for eligible users:
 > https://www.silabs.com/software-and-tools/keil-pk51
 >
-> A precompiled `K870T.hex` is already included if you only need to recover your keyboard.
+> A precompiled [K870T.hex](./K870T_CH555_ReFirmware/Objects/K870T.hex) is already included if you only need to recover your keyboard.
 
 ---
 
