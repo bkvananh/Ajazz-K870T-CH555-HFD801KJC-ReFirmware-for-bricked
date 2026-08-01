@@ -27,6 +27,7 @@ Attempting to recover the keyboard using official channels proved difficult—Aj
   
 * **For HFD801KJC (CH555) Users:** Standard QMK for 8051 ports are overly complex, requiring extensive GPIO remapping and low-level adjustments.
 ![PCB](/image/IMG_0593.jpeg)
+![PCB](/image/IMG_0594.jpeg)
 
 ### How This Firmware Was Created
 Using base EVT examples provided in [HorrorTroll/WCH_CH555](https://github.com/HorrorTroll/WCH_CH555), a lightweight recovery firmware was developed with the assistance of LLMs (Gemini / Claude). It is compiled using **Keil µVision5** and flashed via **WCHISPStudio**. (Pardon the experimental "vibe code", but it successfully revives dead boards!)
