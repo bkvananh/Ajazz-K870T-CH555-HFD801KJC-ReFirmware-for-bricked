@@ -179,9 +179,7 @@ Enable P7.1 as manual reset input pin
 
 After programming completes, the USB device reconnects automatically and the RGB lighting should turn on.
 
----
 
-# PCB
 
 ---
 
