@@ -45,7 +45,7 @@ Older production batches use the **HFD801KJC**, an MCU compatible with the WCH C
 
 ## HFD2201KBA (Sonix)
 
-Users with the Sonix version should use the excellent **SonixQMK** project instead.
+Users with the Sonix version should use the excellent **[SonixQMK](https://github.com/SonixQMK)** project instead.
 
 The HFD2201KBA variant is also firmware-compatible with the **RAKK Lam-Ang Pro (VS11K09A-1)**.
 
@@ -73,7 +73,7 @@ Flashing Sonix firmware onto the CH555 model (or vice versa) results in a non-fu
 
 This firmware was created to provide a simple recovery solution rather than a full QMK replacement.
 
-Development started from the EVT examples in **HorrorTroll/WCH_CH555** and was gradually adapted for the K870T hardware.
+Development started from the EVT examples in **[HorrorTroll/WCH_CH555](https://github.com/HorrorTroll/WCH_CH555)** and was gradually adapted for the K870T hardware.
 
 ---
 
@@ -106,14 +106,18 @@ Development started from the EVT examples in **HorrorTroll/WCH_CH555** and was g
 
 | Tool          | Purpose        |
 | ------------- | -------------- |
-| Keil µVision5 | Build firmware |
-| WCHISPStudio  | Flash firmware |
+| **[Keil µVision5](https://www.keil.com/)** | Build firmware |
+| **[WCHISPStudio](http://www.wch-ic.com/downloads/WCHISPTool_Setup_exe.html)**  | Flash firmware |
 
 > **Note**
 >
-> The free Keil C51 edition is limited to 2 KB of generated code. This project currently exceeds that size, so a valid license is required for building modified firmware.
+> The free Keil C51 edition is limited to **2 KB** of generated code.
+> This project currently exceeds that size, so a valid license is required for building modified firmware.
 >
-> A precompiled HEX file is already included for users who only want to restore their keyboard.
+> Silicon Labs provides free PK51 licenses for eligible users:
+> https://www.silabs.com/software-and-tools/keil-pk51
+>
+> A precompiled `K870T.hex` is already included if you only need to recover your keyboard.
 
 ---
 
@@ -198,9 +202,9 @@ Pull requests, issue reports, and hardware information are appreciated.
 
 ---
 
-# Credits
+## Credits
 
-This project is based on the CH555 EVT examples provided by **HorrorTroll/WCH_CH555**.
+This project is based on the CH555 EVT examples from **[HorrorTroll/WCH_CH555](https://github.com/HorrorTroll/WCH_CH555)**.
 
 It is intended solely for educational purposes and for recovering otherwise unusable keyboards.
 
