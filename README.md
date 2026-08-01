@@ -51,7 +51,8 @@ Using base EVT examples provided in [HorrorTroll/WCH_CH555](https://github.com/H
 
 ## 🛠️ Requirements & Tools
 
-* **IDE / Compiler:** [Keil µVision5](https://www.keil.com/) (MDK-ARM or C51 depending on setup; free evaluation mode works under 2KB limit).
+* **IDE / Compiler:** [Keil µVision5](https://www.keil.com/) (MDK-ARM or C51 depending on setup; free evaluation mode works under 2KB limit). 
+  *Note: After several updates, it has reached 9kb, you should register and obtain a license [here]([URL](https://www.silabs.com/software-and-tools/keil-pk51)) to compile files larger than 2kb.*
 * **Flashing Utility:** [WCHISPStudio](http://www.wch-ic.com/downloads/WCHISPTool_Setup_exe.html) (WCH In-System Programming Tool).
 
 ---
