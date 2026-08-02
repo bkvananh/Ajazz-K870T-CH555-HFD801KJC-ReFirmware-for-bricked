@@ -78,6 +78,8 @@
 #define KC_F10              0x43
 #define KC_F11              0x44
 #define KC_F12              0x45
+#define KC_F13  0x68
+#define KC_F14  0x69
 
 #define KC_PSCR             0x46    
 #define KC_SLCK             0x47    

@@ -84,6 +84,9 @@ void Matrix_Init(void)
     P1_MOD_OC |= 0xC0; P1_DIR_PU |= 0xC0; P1_7 = 1; P1_6 = 1;
     P4_MOD_OC |= 0xFF; P4_DIR_PU |= 0xFF; P4 = 0xFF;
 
+    /* === B?T THANH GHI CH?NG RÒ DÒNG LED TRÊN CH555 === */
+    P4_LED_KEY = 0xFF; 
+
     for (i = 0; i < ENDP1_IN_SIZE; i++) {
         KeyboardReport[i] = 0;
         PrevReport[i] = 0;
@@ -102,7 +105,7 @@ void Matrix_Scan(void)
 
     for (i = 0; i < ENDP1_IN_SIZE; i++) KeyboardReport[i] = 0;
 
-    /* --- C?p nh?t nh?p chuy?n d?ng (Tang t?c d? lên ~20% v?i threshold 10) --- */
+    /* --- C?p nh?t nh?p chuy?n d?ng --- */
     if (++AnimTick >= 10) {
         AnimTick = 0;
         AnimPhase++;
@@ -110,12 +113,11 @@ void Matrix_Scan(void)
 
     for (c = 0; c < MATRIX_COLS; c++) {
         
-        /* 1. Tính toán màu s?c (S? d?ng bu?c nh?y nhân dôi/ba d? thu h?p di?n tích màu) */
+        /* 1. Tính toán màu s?c cho t?ng hàng t?i c?t c */
         for (r = 0; r < MATRIX_ROWS; r++) {
             switch (LedMode)
             {
                 case LED_MODE_SPECIFIED_ROLLING:
-                    /* Ch? d? 1: Bu?c nh?y (c * 2) d?m b?o xu?t hi?n ít nh?t 3-4 màu cùng lúc */
                     idx = (SPECIFIED_TABLE_SIZE * 100 + AnimPhase - c * 2) % SPECIFIED_TABLE_SIZE;
                     cell_r[r] = SpecTable_R[idx];
                     cell_g[r] = SpecTable_G[idx];
@@ -123,7 +125,6 @@ void Matrix_Scan(void)
                     break;
 
                 case LED_MODE_PASTEL_RAINBOW:
-                    /* Ch? d? 2: Bu?c nh?y (c * 2) cho phép d?i c?u v?ng xu?t hi?n tr?n v?n 7 màu */
                     idx = (PASTEL_TABLE_SIZE * 100 + AnimPhase - c * 2) % PASTEL_TABLE_SIZE;
                     cell_r[r] = PastelWheel_R[idx];
                     cell_g[r] = PastelWheel_G[idx];
@@ -131,7 +132,6 @@ void Matrix_Scan(void)
                     break;
 
                 case LED_MODE_ZONE_ROTATE_4X4:
-                    /* Ch? d? 3: Ma tr?n 4x4 th? hi?n d?ng th?i nhi?u tông màu pastel xoay quanh */
                     rz = (r == 0) ? 0 : ((r <= 2) ? 1 : ((r <= 4) ? 2 : 3));
                     cz = (c < 4) ? 0 : ((c < 8) ? 1 : ((c < 12) ? 2 : 3));
                     pos = Zone4x4_Map[rz][cz];
@@ -142,7 +142,6 @@ void Matrix_Scan(void)
                     break;
 
                 case LED_MODE_VERTICAL_DUAL:
-                    /* Ch? d? 4: Bu?c nh?y d?c (r * 3) t?o d?i màu bi?n d?i rõ r?t trên 6 hàng */
                     idx = (DUAL_TABLE_SIZE * 100 + AnimPhase - r * 3) % DUAL_TABLE_SIZE;
                     cell_r[r] = DualTable_R[idx];
                     cell_g[r] = DualTable_G[idx];
@@ -156,7 +155,7 @@ void Matrix_Scan(void)
             }
         }
 
-        /* 2. Ch?n c?t hi?n t?i */
+        /* 2. Ch?n c?t hi?n t?i (Kích ho?t chân COM) */
         P0 = 0xFF; P7 |= (bP7_0_OUT_PU | bP7_1_OUT_PU); P3 = 0xFF;
         if (c < 8) P0 = ~BitMask[c];
         else if (c == 8) P7 &= ~bP7_1_OUT_PU;
@@ -164,7 +163,7 @@ void Matrix_Scan(void)
         else if (c == 16) P3 &= ~0x02;
         else P3 &= ~BitMask[c - 8];
 
-        /* 3. Phát xung PWM 16 c?p d? */
+        /* 3. Phát xung PWM 16 c?p d? cho LED */
         for (sub = 0; sub < PWM_LEVELS; sub++) {
             mask_r = 0; mask_g = 0; mask_b = 0;
             for (r = 0; r < MATRIX_ROWS; r++) {
@@ -181,11 +180,15 @@ void Matrix_Scan(void)
             mDelayuS(1);
         }
 
-        /* 4. Quét ma tr?n phím b?m */
-        P4_MOD_OC |= 0xFF;
-        P4 = 0xFF;
-        mDelayuS(5);
+        /* 4. Quét phím: CÁCH LY DÒNG LED Ð? TRI?T TIÊU RÒ MÀU */
+        P2 = 0xFF; 
+        P1 = 0xFF; 
+        P4_MOD_OC |= 0xFF; /* Ðua P4 v? Input High-Pullup */
+        P4 = 0xFF; 
 
+        mDelayuS(1); /* Tr? siêu ng?n 1us d? di?n áp P4 ?n d?nh */
+
+        /* Ð?c tr?ng thái phím gõ */
         for (r = 0; r < MATRIX_ROWS; r++) {
             if ((P4 & BitMask[r]) == 0) {
                 keycode = KeyMap[r][c];
@@ -206,7 +209,7 @@ void Matrix_Scan(void)
         }
     }
 
-    /* X? lý chuy?n d?i ch? d? LED */
+    /* X? lý phím d?i Ch? d? LED */
     if (led_key_pressed) {
         if (!LedKeyDebounce) {
             LedMode++;
@@ -220,12 +223,12 @@ void Matrix_Scan(void)
     P0 = 0xFF; P7 |= (bP7_0_OUT_PU | bP7_1_OUT_PU); P3 = 0xFF;
     P2 = 0xFF; P1 = 0xFF; P4 = 0xFF;
 
-    /* --- X? LÝ NÚM XOAY: TANG / GI?M ÂM LU?NG (Volume Up / Down) --- */
+    /* --- X? LÝ NÚM XOAY: TANG / GI?M ÂM LU?NG --- */
     curr_a = ENCODER_PAD_A;
-    if (last_a == 1 && curr_a == 0) {
-        KeyboardReport[2] = (ENCODER_PAD_B == 1) ? KC_VOLU : KC_VOLD;
-    }
-    last_a = curr_a;
+if (last_a == 1 && curr_a == 0) {
+    KeyboardReport[2] = (ENCODER_PAD_B == 1) ? KC_F13 : KC_F14;
+}
+last_a = curr_a;
 
     ReportChanged = 0;
     for (i = 0; i < ENDP1_IN_SIZE; i++) {

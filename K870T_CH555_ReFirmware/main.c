@@ -8,7 +8,7 @@ void main(void)
     CfgFsys();
     mDelaymS(20);
 
-    Matrix_Init();      // da bao gom cau hinh LED + ma tran phim
+    Matrix_Init();      // khoi tao ma tran, LED va P4_LED_KEY
     InitUSB_Device();
     EA = 1;
 
@@ -16,7 +16,8 @@ void main(void)
     {
         if (Ready)
         {
-            Matrix_Scan();   // vua quet phim, vua sang LED, gop lam 1
+            /* Quet va quat LED xuyen suot continuous, khong bi hoan boidelay */
+            Matrix_Scan();
 
             if (ReportChanged)
             {
@@ -26,6 +27,6 @@ void main(void)
             }
         }
 
-        mDelaymS(DEBOUNCE_MS);
+        /* DA XOA mDelaymS(DEBOUNCE_MS) AT DAY DE TRIET TIEU HOAN TOAN L?I CH?P NHÁY LED */
     }
 }
